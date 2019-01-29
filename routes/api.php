@@ -17,16 +17,37 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/test', function (Request $request) {
+Route::post('/compileJava', function (Request $request) {
     $rand = rand(0,99999999999);
-    $javaFile = fopen($rand.".java", "w");
+    mkdir('compiledFiles/'.$rand);
+    $javaFile = fopen('compiledFiles/'.$rand.'/Test.java', 'w');
     fwrite($javaFile, $request->code);
     fclose($javaFile);
     $output = [];
-    exec('javac '.$rand.'.java');
-    $output = [];
-    exec('java Test', $output);
-    unlink($rand.".java");
-    unlink("Test.class");
+    exec('javac compiledFiles/'.$rand.'/Test.java');
+    exec('cd compiledFiles && cd '.$rand.' && java Test', $output);
+    deleteAll('compiledFiles');
     return $output;
 });
+
+// remove files and folders inside a  directory
+function deleteAll($str) {
+    //It it's a file.
+    if (is_file($str)) {
+        //Attempt to delete it.
+        return unlink($str);
+    }
+    //If it's a directory.
+    elseif (is_dir($str)) {
+        //Get a list of the files in this directory.
+        $scan = glob(rtrim($str,'/').'/*');
+        //Loop through the list of files.
+        foreach($scan as $index=>$path) {
+            //Call our recursive function.
+            deleteAll($path);
+        }
+        //Remove the directory itself.
+        // return @rmdir($str);
+        return;
+    }
+}
