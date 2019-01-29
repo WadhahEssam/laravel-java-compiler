@@ -18,17 +18,15 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::get('/test', function (Request $request) {
-    return $request['code'];
-
     $rand = rand(0,99999999999);
     $javaFile = fopen($rand.".java", "w");
     fwrite($javaFile, $request->code);
     fclose($javaFile);
-    unlink($rand.".java");
     $output = [];
-    exec('pwd', $output);
-    exec('javac Test.java');
+    exec('javac '.$rand.'.java');
     $output = [];
     exec('java Test', $output);
+    unlink($rand.".java");
+    unlink("Test.class");
     return $output;
 });
