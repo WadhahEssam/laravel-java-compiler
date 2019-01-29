@@ -17,7 +17,14 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/test', function () {
+Route::get('/test', function (Request $request) {
+    return $request['code'];
+
+    $rand = rand(0,99999999999);
+    $javaFile = fopen($rand.".java", "w");
+    fwrite($javaFile, $request->code);
+    fclose($javaFile);
+    unlink($rand.".java");
     $output = [];
     exec('pwd', $output);
     exec('javac Test.java');
